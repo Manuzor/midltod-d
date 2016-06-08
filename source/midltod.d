@@ -893,7 +893,7 @@ void EmitEnum(ref EnumData Enum, FormattedOutput Output)
   auto Entries = Enum.Entries.dup;
   auto Prefix = commonPrefix(Enum.Name, Entries[0].Key);
 
-  ulong MaxLen;
+  size_t MaxLen;
   foreach(ref Entry; Entries)
   {
     MaxLen = max(MaxLen, Entry.Key.length);
