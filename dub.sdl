@@ -1,6 +1,7 @@
 name "midltod-d"
 description "Tool written in the D Programming Language to convert Microsoft Interface Definition Language files to D source code."
 copyright "Copyright © 2016, Manuzor"
+license "MIT"
 authors "Manuzor"
 
 targetName "midltod"
