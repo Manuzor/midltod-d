@@ -5,4 +5,5 @@ license "MIT"
 authors "Manuzor"
 
 targetName "midltod"
+targetType "executable"
 targetPath "build"
