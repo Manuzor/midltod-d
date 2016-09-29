@@ -1,16 +1,6 @@
 import std.stdio;
-import std.algorithm;
-import std.conv;
-import std.format;
 import std.range;
-import std.array;
-import std.string;
-import std.ascii : isDigit;
-import std.uni;
-import std.file : read;
 import std.path;
-import std.traits;
-import std.typecons;
 import std.datetime;
 
 import midltod;
