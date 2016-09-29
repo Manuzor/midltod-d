@@ -3,15 +3,12 @@ import std.algorithm;
 import std.conv;
 import std.format;
 import std.range;
-import std.array;
-import std.string;
+
+import std.string : strip, stripRight, stripLeft, toUpper;
 import std.ascii : isDigit;
-import std.uni;
+import std.uni : isWhite, isLower;
 import std.file : read;
-import std.path;
-import std.traits;
-import std.typecons;
-import std.datetime;
+import std.path : stripExtension;
 
 char[] view(char[] str, size_t numToView)
 {
