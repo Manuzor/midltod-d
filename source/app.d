@@ -5,48 +5,48 @@ import std.datetime;
 
 import midltod;
 
-void main(string[] Args)
+void main(string[] args)
 {
-  const Program = Args[0];
-  Args = Args[1 .. $];
+  args = args[1 .. $];
 
-  assert(Args.length == 2, "Need 2 arguments.");
+  assert(args.length == 2, "Need 2 arguments.");
 
   Log = new FormattedOutput();
-  Log.OutFile = stderr;
+  Log.outFile = stderr;
 
-  auto InFilename  = Args[0];
-  auto OutFilename = Args[1];
+  auto inFilename  = args[0];
+  auto outFilename = args[1];
 
-  char[] InputBuffer = ReadTextAsUTF8(InFilename);
+  char[] inputBuffer = readTextAsUTF8(inFilename);
 
-  InputBuffer = InputBuffer.Preprocess();
+  inputBuffer = inputBuffer.preprocess();
 
-  int[CodeType.max + 1] Stats;
-  auto Blocks = Parse(InputBuffer, Stats);
+  int[CodeType.max + 1] stats;
+  auto blocks = parse(inputBuffer, stats);
 
-  auto Output = new FormattedOutput();
-  if(OutFilename == "-")
+  auto output = new FormattedOutput();
+  if(outFilename == "-")
   {
-    Output.OutFile = stdout;
+    output.outFile = stdout;
   }
   else
   {
-    Output.OutFile.open(OutFilename, "w");
+    output.outFile.open(outFilename, "w");
   }
 
   Log.writeln('='.repeat(72));
 
-  Output.write("// Original file name: ", InFilename.baseName, Output.Newline);
-  Output.write("// Conversion date: ", Clock.currTime, Output.Newline);
-  Output.write(OutContentHeader);
+  output.write("// Original file name: ", inFilename.baseName, output.newline);
+  output.write("// Conversion date: ", Clock.currTime, output.newline);
+  output.write(outContentHeader);
 
-  if(Stats[CodeType.CppQuote])
+  if(stats[CodeType.cppQuote])
   {
-    Output.writef(`static assert(0, "There are %s lines of cpp_quotes batched into several regions that need to be converted manually. Every batch is enclosed by // Begin/End cpp_quote #X.");`,
-                  Stats[CodeType.CppQuote]);
-    Output.write(Output.Newline, Output.Newline);
+    output.writef(`static assert(0, "There are %s lines of cpp_quotes batched into several regions that need to ` ~
+                  `be converted manually. Every batch is enclosed by // Begin/End cpp_quote #X.");`,
+                  stats[CodeType.cppQuote]);
+    output.write(output.newline, output.newline);
   }
 
-  EmitBlocks(Blocks, Output);
+  emitBlocks(blocks, output);
 }

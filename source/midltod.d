@@ -13,1224 +13,1228 @@ import std.traits;
 import std.typecons;
 import std.datetime;
 
-char[] View(char[] String, size_t NumToView)
+char[] view(char[] str, size_t numToView)
 {
-  return String[0 .. min($, NumToView)];
+  return str[0 .. min($, numToView)];
 }
 
 enum CodeType
 {
-  INVALID,
+  invalid,
 
-  Import,
-  CppQuote,
-  Constant,
-  Enum,
-  Aggregate,
-  Interface,
-  Function,
-  Alias,
+  import_,
+  cppQuote,
+  constant,
+  enum_,
+  aggregate,
+  interface_,
+  function_,
+  alias_,
 }
 
 struct BlockData
 {
-  CodeType Type;
+  CodeType type;
   union
   {
-    ImportData Import;
-    CppQuoteData CppQuote;
-    ConstantData Constant;
-    EnumData Enum;
-    AggregateData Aggregate;
-    InterfaceData Interface;
-    FunctionData Function;
-    AliasData Alias;
+    ImportData import_;
+    CppQuoteData cppQuote;
+    ConstantData constant;
+    EnumData enum_;
+    AggregateData aggregate;
+    InterfaceData interface_;
+    FunctionData function_;
+    AliasData alias_;
   }
 
   string toString() const
   {
-    final switch(Type)
+    final switch(type)
     {
-      case CodeType.Import:    return "BlockData(%s)".format(Import);
-      case CodeType.CppQuote:  return "BlockData(%s)".format(CppQuote);
-      case CodeType.Constant:  return "BlockData(%s)".format(Constant);
-      case CodeType.Enum:      return "BlockData(%s)".format(Enum);
-      case CodeType.Aggregate: return "BlockData(%s)".format(Aggregate);
-      case CodeType.Interface: return "BlockData(%s)".format(Interface);
-      case CodeType.Function:  return "BlockData(%s)".format(Function);
-      case CodeType.Alias:     return "BlockData(%s)".format(Alias);
-      case CodeType.INVALID: assert(0);
+      case CodeType.import_:    return "BlockData(%s)".format(import_);
+      case CodeType.cppQuote:   return "BlockData(%s)".format(cppQuote);
+      case CodeType.constant:   return "BlockData(%s)".format(constant);
+      case CodeType.enum_:      return "BlockData(%s)".format(enum_);
+      case CodeType.aggregate:  return "BlockData(%s)".format(aggregate);
+      case CodeType.interface_: return "BlockData(%s)".format(interface_);
+      case CodeType.function_:  return "BlockData(%s)".format(function_);
+      case CodeType.alias_:     return "BlockData(%s)".format(alias_);
+      case CodeType.invalid: assert(0);
     }
   }
 }
 
 struct ImportData
 {
-  char[] Filename;
+  char[] filename;
 }
 
 struct CppQuoteData
 {
-  char[] Content;
+  char[] content;
 }
 
 struct ConstantData
 {
-  char[] Type;
-  char[] Name;
-  char[] Value;
+  char[] type;
+  char[] name;
+  char[] value;
 }
 
 struct EnumData
 {
   static struct Entry
   {
-    char[] Key;
-    char[] Value;
+    char[] key;
+    char[] value;
   }
 
-  char[] Name;
-  Entry[] Entries;
+  char[] name;
+  Entry[] entries;
 }
 
 struct Declaration
 {
-  AttributeData[] Attributes;
-  char[] Type;
-  Declaration[] Body; // Only valid if Type == "struct" || Type == "union"
-  char[] Name;
-  char[][] ArrayCounts; // e.g. int Foo[MAX_STUFF][3];
+  AttributeData[] attributes;
+  char[] type;
+  Declaration[] body_; // Only valid if type == "struct" || type == "union"
+  char[] name;
+  char[][] arrayCounts; // e.g. int Foo[MAX_STUFF][3];
 }
 
 struct AggregateData
 {
   enum Type
   {
-    Struct,
-    Union,
+    struct_,
+    union_,
   }
 
-  Type AggregateType;
-  char[] Name;
-  Declaration[] Members;
+  Type aggregateType;
+  char[] name;
+  Declaration[] members;
 }
 
 struct InterfaceData
 {
-  AttributeData[] Attributes;
-  char[] Name;
-  char[] ParentName;
-  FunctionData[] Functions;
+  AttributeData[] attributes;
+  char[] name;
+  char[] parentName;
+  FunctionData[] functions;
 }
 
 struct FunctionData
 {
-  char[] ReturnType;
-  char[] Name;
-  Declaration[] Params;
+  char[] returnType;
+  char[] name;
+  Declaration[] params;
 }
 
 struct AliasData
 {
-  char[] NewName;
-  char[] OldName;
+  char[] newName;
+  char[] oldName;
 }
 
 enum AttributeType
 {
-  INVALID,
+  invalid,
 
   // Mostly used for interfaces:
-  Object,
-  Uuid,
-  Local,
-  PointerDefault,
+  object,
+  uuid,
+  local,
+  pointerDefault,
 
   // Mostly used in functions:
-  In,
-  Out,
-  Retval,
-  SizeIs,
-  Annotation,
+  in_,
+  out_,
+  retval,
+  sizeIs,
+  annotation,
 }
 
 struct AttributeData
 {
-  AttributeType Type;
-  char[] Value;
+  AttributeType type;
+  char[] value;
 
   string toString() const
   {
-    string Result;
-    final switch(Type)
+    string result;
+    final switch(type)
     {
-      case AttributeType.Object:          Result = "object";          break;
-      case AttributeType.Uuid:            Result = "uuid";            break;
-      case AttributeType.Local:           Result = "local";           break;
-      case AttributeType.PointerDefault:  Result = "pointer_default"; break;
-      case AttributeType.In:              Result = "in";              break;
-      case AttributeType.Out:             Result = "out";             break;
-      case AttributeType.Retval:          Result = "retval";          break;
-      case AttributeType.SizeIs:          Result = "size_is";         break;
-      case AttributeType.Annotation:      Result = "annotation";      break;
+      case AttributeType.object:          result = "object";          break;
+      case AttributeType.uuid:            result = "uuid";            break;
+      case AttributeType.local:           result = "local";           break;
+      case AttributeType.pointerDefault:  result = "pointer_default"; break;
+      case AttributeType.in_:             result = "in";              break;
+      case AttributeType.out_:            result = "out";             break;
+      case AttributeType.retval:          result = "retval";          break;
+      case AttributeType.sizeIs:          result = "size_is";         break;
+      case AttributeType.annotation:      result = "annotation";      break;
 
-      case AttributeType.INVALID: assert(0);
+      case AttributeType.invalid: assert(0);
     }
 
-    if(Value.length)
+    if(value.length)
     {
-      Result ~= `("` ~ Value ~ `")`;
+      result ~= `("` ~ value ~ `")`;
     }
 
-    return Result;
+    return result;
   }
 }
 
 class FormattedOutput
 {
-  int IndentationLevel;
-  string Newline = "\n";
+  int indentationLevel;
+  string newline = "\n";
 
-  File OutFile;
+  File outFile;
 
-  @property auto Indentation() { return ' '.repeat(IndentationLevel); }
-  void Indent(int Amount = 2)
+  @property auto indentation() { return ' '.repeat(indentationLevel); }
+  void indent(int amount = 2)
   {
-    IndentationLevel += Amount;
+    indentationLevel += amount;
   }
 
-  void Outdent(int Amount = 2)
+  void outdent(int amount = 2)
   {
-    IndentationLevel = max(0, IndentationLevel - Amount);
+    indentationLevel = max(0, indentationLevel - amount);
   }
 
-  void WriteIndentation()
+  void writeIndentation()
   {
-    this.write(Indentation);
+    this.write(indentation);
   }
 
-  alias OutFile this;
+  alias outFile this;
 }
 
-FormattedOutput Log;
-
-void ParseImport(ref char[] Source, ref BlockData[] Blocks)
+struct Log
 {
-  Log.writeln(Log.Indentation, "=== Parsing Import ===");
+  static FormattedOutput file;
 
-  assert(Source.startsWith("import"), Source.View(100));
-  Source.popFrontN("import".length);
-  assert(Source.front.isWhite, Source.View(100));
-
-  Source.SkipWhiteSpace();
-
-  assert(Source.front == '"');
-  Source.popFront();
-
-  ImportData Result;
-  Result.Filename = Source.ParseEscapableString('"');
-  Log.writeln(Log.Indentation, "Filename: ", Result.Filename);
-
-  Source.SkipWhiteSpace();
-
-  assert(Source.front == ';');
-
-  Source.popFront();
-
-  auto Block = BlockData(CodeType.Import);
-  Block.Import = Result;
-  Blocks ~= Block;
+  alias file this;
 }
 
-void ParseCppQuote(ref char[] Source, ref BlockData[] Blocks)
+void parseImport(ref char[] source, ref BlockData[] blocks)
 {
-  Log.writeln(Log.Indentation, "=== Parsing CppQuote ===");
+  Log.writeln(Log.indentation, "=== Parsing Import ===");
 
-  CppQuoteData Result;
+  assert(source.startsWith("import"), source.view(100));
+  source.popFrontN("import".length);
+  assert(source.front.isWhite, source.view(100));
 
-  assert(Source.startsWith("cpp_quote"));
-  Source.popFrontN("cpp_quote".length);
+  source.skipWhiteSpace();
 
-  Source.SkipWhiteSpace();
+  assert(source.front == '"');
+  source.popFront();
 
-  assert(Source.front == '(');
-  Source.popFront();
+  ImportData result;
+  result.filename = source.parseEscapableString('"');
+  Log.writeln(Log.indentation, "Filename: ", result.filename);
 
-  Source.SkipWhiteSpace();
+  source.skipWhiteSpace();
 
-  assert(Source.front == '"');
-  Source.popFront();
+  assert(source.front == ';');
 
-  Result.Content = Source.ParseEscapableString('"').strip();
-  Log.writeln(Log.Indentation, "Content: ", Result.Content);
+  source.popFront();
 
-  Source.SkipWhiteSpace();
-
-  assert(Source.front == ')', Source.View(100));
-  Source.popFront();
-
-  auto Block = BlockData(CodeType.CppQuote);
-  Block.CppQuote = Result;
-  Blocks ~= Block;
+  auto block = BlockData(CodeType.import_);
+  block.import_ = result;
+  blocks ~= block;
 }
 
-void ParseConstant(ref char[] Source, ref BlockData[] Blocks)
+void parseCppQuote(ref char[] source, ref BlockData[] blocks)
 {
-  Log.writeln(Log.Indentation, "=== Parsing Constant ===");
+  Log.writeln(Log.indentation, "=== Parsing CppQuote ===");
 
-  ConstantData Result;
+  CppQuoteData result;
+
+  assert(source.startsWith("cpp_quote"));
+  source.popFrontN("cpp_quote".length);
+
+  source.skipWhiteSpace();
+
+  assert(source.front == '(');
+  source.popFront();
+
+  source.skipWhiteSpace();
+
+  assert(source.front == '"');
+  source.popFront();
+
+  result.content = source.parseEscapableString('"').strip();
+  Log.writeln(Log.indentation, "Content: ", result.content);
+
+  source.skipWhiteSpace();
+
+  assert(source.front == ')', source.view(100));
+  source.popFront();
+
+  auto block = BlockData(CodeType.cppQuote);
+  block.cppQuote = result;
+  blocks ~= block;
+}
+
+void parseConstant(ref char[] source, ref BlockData[] blocks)
+{
+  Log.writeln(Log.indentation, "=== Parsing Constant ===");
+
+  ConstantData result;
 
   // Skip 'const' or '#define'
-  auto FirstToken = Source.FastForwardUntil!isWhite;
-  assert(FirstToken == "const" || FirstToken == "#define", FirstToken);
+  const firstToken = source.fastForwardUntil!isWhite;
+  assert(firstToken == "const" || firstToken == "#define", firstToken);
 
-  if(FirstToken == "const")
+  if(firstToken == "const")
   {
-    Source.SkipWhiteSpace();
+    source.skipWhiteSpace();
 
-    Result.Type = Source.FastForwardUntil!isWhite;
-    Log.writeln(Log.Indentation, "Type: ", Result.Type);
+    result.type = source.fastForwardUntil!isWhite;
+    Log.writeln(Log.indentation, "Type: ", result.type);
 
-    Result.Name = Source.FastForwardUntil!(Char => Char == '=').strip;
-    Log.writeln(Log.Indentation, "Name: ", Result.Name);
+    result.name = source.fastForwardUntil!(ch => ch == '=').strip;
+    Log.writeln(Log.indentation, "Name: ", result.name);
 
-    Result.Value = Source.FastForwardUntil!(Char => Char == ';').strip;
-    Log.writeln(Log.Indentation, "Value: ", Result.Value);
+    result.value = source.fastForwardUntil!(ch => ch == ';').strip;
+    Log.writeln(Log.indentation, "Value: ", result.value);
   }
   else
   {
-    Source.SkipWhiteSpace();
+    source.skipWhiteSpace();
 
-    Result.Name = Source.FastForwardUntil!isWhite.strip;
-    Log.writeln(Log.Indentation, "Name: ", Result.Name);
+    result.name = source.fastForwardUntil!isWhite.strip;
+    Log.writeln(Log.indentation, "Name: ", result.name);
 
-    Result.Value = Source.FastForwardUntil!(Char => Char == '\n').strip;
-    Log.writeln(Log.Indentation, "Value: ", Result.Value);
+    result.value = source.fastForwardUntil!(ch => ch == '\n').strip;
+    Log.writeln(Log.indentation, "Value: ", result.value);
   }
 
-  auto Block = BlockData(CodeType.Constant);
-  Block.Constant = Result;
-  Blocks ~= Block;
+  auto block = BlockData(CodeType.constant);
+  block.constant = result;
+  blocks ~= block;
 }
 
-void ParseEnum(ref char[] Source, ref BlockData[] Blocks)
+void parseEnum(ref char[] source, ref BlockData[] blocks)
 {
-  Log.writeln(Log.Indentation, "=== Parsing Enum ===");
+  Log.writeln(Log.indentation, "=== Parsing Enum ===");
 
-  EnumData Result;
+  EnumData result;
 
   // Skip 'typedef'
-  auto TypedefToken = Source.FastForwardUntil!isWhite;
-  assert(TypedefToken == "typedef");
+  const typedefToken = source.fastForwardUntil!isWhite;
+  assert(typedefToken == "typedef");
 
-  Source.SkipWhiteSpace();
+  source.skipWhiteSpace();
 
   // Skip 'enum'
-  auto EnumToken = Source.FastForwardUntil!isWhite;
+  const EnumToken = source.fastForwardUntil!isWhite;
   assert(EnumToken == "enum");
 
   // Read everything between 'enum' and '{'
-  auto TagName = Source.FastForwardUntil!(Char => Char == '{').strip;
-  Log.writeln(Log.Indentation, "Tag Name: ", TagName);
+  auto TagName = source.fastForwardUntil!(ch => ch == '{').strip;
+  Log.writeln(Log.indentation, "Tag Name: ", TagName);
 
-  auto Body = Source.FastForwardUntil!(Char => Char == '}');
+  auto body_ = source.fastForwardUntil!(ch => ch == '}');
 
-  Result.Name = Source.FastForwardUntil!(Char => Char == ';').strip;
-  Log.writeln(Log.Indentation, "Name: ", Result.Name);
+  result.name = source.fastForwardUntil!(ch => ch == ';').strip;
+  Log.writeln(Log.indentation, "Name: ", result.name);
 
-  Log.Indent();
+  Log.indent();
 
   while(true)
   {
-    Body.SkipWhiteSpace();
+    body_.skipWhiteSpace();
 
-    if(Body.empty) break;
+    if(body_.empty) break;
 
-    Result.Entries.length++;
-    auto Entry = &Result.Entries.back;
-    scope(failure) Log.writeln(Log.Indentation, "Entry: ", *Entry);
+    result.entries.length++;
+    auto entry = &result.entries.back;
+    scope(failure) Log.writeln(Log.indentation, "Entry: ", *entry);
 
-    auto EntryCode = Body.FastForwardUntil!(Char => Char == ',');
-    EntryCode.SkipWhiteSpace();
+    auto EntryCode = body_.fastForwardUntil!(ch => ch == ',');
+    EntryCode.skipWhiteSpace();
 
-    Entry.Key = EntryCode.FastForwardUntil!(Char => Char == '=').strip;
-    Log.writeln(Log.Indentation, "Key: ", Entry.Key);
+    entry.key = EntryCode.fastForwardUntil!(ch => ch == '=').strip;
+    Log.writeln(Log.indentation, "key: ", entry.key);
 
-    EntryCode.SkipWhiteSpace();
+    EntryCode.skipWhiteSpace();
 
-    Entry.Value = EntryCode.strip; // The rest of the code.
-    Log.writeln(Log.Indentation, "Value: ", Entry.Value);
+    entry.value = EntryCode.strip; // The rest of the code.
+    Log.writeln(Log.indentation, "Value: ", entry.value);
   }
 
-  Log.Outdent();
+  Log.outdent();
 
-  auto Block = BlockData(CodeType.Enum);
-  Block.Enum = Result;
-  Blocks ~= Block;
+  auto block = BlockData(CodeType.enum_);
+  block.enum_ = result;
+  blocks ~= block;
 }
 
-/// Params:
-///   FieldDelimiter = Usually ';' for structs and unions or ',' for function parameters.
-void ParseDeclaration(ref char[] Body, ref Declaration Decl, dchar FieldDelimiter)
+/// params:
+///   fieldDelimiter = Usually ';' for structs and unions or ',' for function parameters.
+void parseDeclaration(ref char[] body_, ref Declaration decl, dchar fieldDelimiter)
 {
-  Log.writeln(Log.Indentation, "=== Parsing Declaration ===");
-  Log.Indent();
-  scope(exit) Log.Outdent();
+  Log.writeln(Log.indentation, "=== Parsing Declaration ===");
+  Log.indent();
+  scope(exit) Log.outdent();
 
-  TryParseAttributes(Body, Decl.Attributes);
+  tryParseAttributes(body_, decl.attributes);
 
-  Body.SkipWhiteSpace();
+  body_.skipWhiteSpace();
 
-  auto TempBody = Body;
-  auto Prefix = TempBody.FastForwardUntil!isWhite;
-  if(Prefix == "struct" || Prefix == "union")
+  auto tempBody = body_;
+  const prefix = fastForwardUntil!isWhite(tempBody);
+  if(prefix == "struct" || prefix == "union")
   {
-    Log.writeln(Log.Indentation, "Declaration is an inner aggregate type.");
+    Log.writeln(Log.indentation, "Declaration is an inner aggregate type.");
 
-    Decl.Type = Body.FastForwardUntil!isWhite;
-    assert(Decl.Type == Prefix);
+    decl.type = body_.fastForwardUntil!isWhite;
+    assert(decl.type == prefix);
 
-    auto InnerTagName = Body.FastForwardUntil!(Char => Char == '{').strip;
+    auto InnerTagName = body_.fastForwardUntil!(ch => ch == '{').strip;
     if(InnerTagName.length)
     {
-      Log.writeln(Log.Indentation, "Tag Name: ", InnerTagName);
+      Log.writeln(Log.indentation, "Tag Name: ", InnerTagName);
     }
     else
     {
-      Log.writeln(Log.Indentation, "No tag name found.");
+      Log.writeln(Log.indentation, "No tag name found.");
     }
 
-    auto InnerBody = Body.ParseNestedString('{', '}');
-    auto InnerName = Body.FastForwardUntil!(Char => Char == FieldDelimiter).strip;
+    auto InnerBody = body_.parseNestedString('{', '}');
+    auto InnerName = body_.fastForwardUntil!(ch => ch == fieldDelimiter).strip;
 
-    Log.writeln(Log.Indentation, "Name: ", InnerName);
+    Log.writeln(Log.indentation, "Name: ", InnerName);
 
     while(true)
     {
-      InnerBody.SkipWhiteSpace();
+      InnerBody.skipWhiteSpace();
 
       if(InnerBody.empty) break;
 
       Declaration InnerDecl;
-      scope(failure) Log.writeln(Log.Indentation, "Inner Declaration: ", InnerDecl);
+      scope(failure) Log.writeln(Log.indentation, "Inner Declaration: ", InnerDecl);
 
-      ParseDeclaration(InnerBody, InnerDecl, ';');
-      Decl.Body ~= InnerDecl;
+      parseDeclaration(InnerBody, InnerDecl, ';');
+      decl.body_ ~= InnerDecl;
     }
 
-    Log.Outdent();
+    Log.outdent();
   }
   else
   {
-    Log.writeln(Log.Indentation, "Declaration is a regular field.");
+    Log.writeln(Log.indentation, "Declaration is a regular field.");
 
-    auto FieldCode = Body.FastForwardUntil!(Char => Char == FieldDelimiter);
+    auto fieldCode = body_.fastForwardUntil!(ch => ch == fieldDelimiter);
 
-    FieldCode = FieldCode.strip();
+    fieldCode = fieldCode.strip();
 
-    if(FieldCode == "void")
+    if(fieldCode == "void")
     {
-      Decl.Type = FieldCode;
+      decl.type = fieldCode;
       return;
     }
 
-    while(FieldCode.back == ']')
+    while(fieldCode.back == ']')
     {
-      FieldCode.popBack();
-      auto ArrayCountLength = FieldCode.retro.countUntil('[');
-      Decl.ArrayCounts ~= FieldCode[$ - ArrayCountLength .. $].strip;
-      FieldCode.popBackN(ArrayCountLength + 1);
+      fieldCode.popBack();
+      auto ArrayCountLength = fieldCode.retro.countUntil('[');
+      decl.arrayCounts ~= fieldCode[$ - ArrayCountLength .. $].strip;
+      fieldCode.popBackN(ArrayCountLength + 1);
     }
 
-    auto SlackUntilDelimiter = FieldCode.retro.countUntil!(Char => Char.isWhite || Char == '*');
+    auto slackUntilDelimiter = fieldCode.retro.countUntil!(ch => ch.isWhite || ch == '*');
 
-    Decl.Type = FieldCode[0                       .. $ - SlackUntilDelimiter].strip;
-    Decl.Name = FieldCode[$ - SlackUntilDelimiter .. $                      ].strip;
+    decl.type = fieldCode[0                       .. $ - slackUntilDelimiter].strip;
+    decl.name = fieldCode[$ - slackUntilDelimiter .. $                      ].strip;
 
-    Log.writeln(Log.Indentation, "Type: ", Decl.Type);
-    Log.writeln(Log.Indentation, "Name: ", Decl.Name);
+    Log.writeln(Log.indentation, "Type: ", decl.type);
+    Log.writeln(Log.indentation, "Name: ", decl.name);
   }
 }
 
-void ParseAggregate(ref char[] Source, ref BlockData[] Blocks)
+void parseAggregate(ref char[] source, ref BlockData[] blocks)
 {
-  Log.writeln(Log.Indentation, "=== Parsing Aggregate ===");
+  Log.writeln(Log.indentation, "=== Parsing Aggregate ===");
 
-  AggregateData Result;
+  AggregateData result;
 
-  auto TypedefToken = Source.FastForwardUntil!isWhite;
-  assert(TypedefToken == "typedef");
+  const typedefToken = source.fastForwardUntil!isWhite;
+  assert(typedefToken == "typedef");
 
-  Source.SkipWhiteSpace();
+  source.skipWhiteSpace();
 
-  auto FirstToken = Source.FastForwardUntil!isWhite;
+  const firstToken = source.fastForwardUntil!isWhite;
 
-  if(FirstToken == "struct")
+  if(firstToken == "struct")
   {
-    Result.AggregateType = AggregateData.Type.Struct;
+    result.aggregateType = AggregateData.Type.struct_;
   }
-  else if(FirstToken == "union")
+  else if(firstToken == "union")
   {
-    Result.AggregateType = AggregateData.Type.Union;
+    result.aggregateType = AggregateData.Type.union_;
   }
   else assert(0);
 
   // Read everything between 'struct' and '{'
-  auto TagName = Source.FastForwardUntil!(Char => Char == '{').strip;
+  auto TagName = source.fastForwardUntil!(ch => ch == '{').strip;
   if(TagName.length)
   {
-    Log.writeln(Log.Indentation, "Tag Name: ", TagName);
+    Log.writeln(Log.indentation, "Tag Name: ", TagName);
   }
   else
   {
-    Log.writeln(Log.Indentation, "No tag name found.");
+    Log.writeln(Log.indentation, "No tag name found.");
   }
 
-  auto Body = Source.ParseNestedString('{', '}');
+  auto body_ = source.parseNestedString('{', '}');
 
-  Result.Name = Source.FastForwardUntil!(Char => Char == ';').strip;
-  assert(Result.Name.length);
-  Log.writeln(Log.Indentation, "Name: ", Result.Name);
+  result.name = source.fastForwardUntil!(ch => ch == ';').strip;
+  assert(result.name.length);
+  Log.writeln(Log.indentation, "Name: ", result.name);
 
-  Log.Indent();
+  Log.indent();
 
   while(true)
   {
-    Body.SkipWhiteSpace();
+    body_.skipWhiteSpace();
 
-    if(Body.empty) break;
+    if(body_.empty) break;
 
-    Declaration Member;
-    scope(failure) Log.writeln(Log.Indentation, "Member: ", Member);
+    Declaration member;
+    scope(failure) Log.writeln(Log.indentation, "Member: ", member);
 
-    ParseDeclaration(Body, Member, ';');
+    parseDeclaration(body_, member, ';');
 
-    Result.Members ~= Member;
+    result.members ~= member;
   }
 
-  Log.Outdent();
+  Log.outdent();
 
-  auto Block = BlockData(CodeType.Aggregate);
-  Block.Aggregate = Result;
-  Blocks ~= Block;
+  auto block = BlockData(CodeType.aggregate);
+  block.aggregate = result;
+  blocks ~= block;
 
-  Log.writeln(Log.Indentation, "New Block: ", Blocks.back);
+  Log.writeln(Log.indentation, "New Block: ", blocks.back);
 }
 
-char[] ParseNestedString(ref char[] Source, char FrontChar, char BackChar, Flag!"CanExhaustSource" CanExhaustSource = Yes.CanExhaustSource)
+char[] parseNestedString(ref char[] source, char frontChar, char backChar,
+  Flag!"CanExhaustSource" canExhaustSource = Yes.CanExhaustSource)
 {
-  auto ParsedSource = Source;
-  int NumBackCharsNeeded = 1;
+  auto parsedSource = source;
+  int numBackCharsNeeded = 1;
 
   do
   {
-    char Delimiter;
-    ParsedSource.FastForwardUntil!(Char => Char == FrontChar || Char == BackChar)(&Delimiter);
+    char delimiter;
+    parsedSource.fastForwardUntil!(ch => ch == frontChar || ch == backChar)(&delimiter);
 
-    if(Delimiter == FrontChar)
+    if(delimiter == frontChar)
     {
-      NumBackCharsNeeded++;
+      numBackCharsNeeded++;
     }
-    else if(Delimiter == BackChar)
+    else if(delimiter == backChar)
     {
-      NumBackCharsNeeded--;
+      numBackCharsNeeded--;
     }
     else
     {
-      assert(CanExhaustSource, "Source got exhausted before the matching closing delimiter was found.");
+      assert(canExhaustSource, "Source got exhausted before the matching closing delimiter was found.");
       break;
     }
-  } while(NumBackCharsNeeded);
+  } while(numBackCharsNeeded);
 
-  auto Result = Source[0 .. $ - min(Source.length, ParsedSource.length + 1)];
-  Source = ParsedSource;
-  return Result;
+  auto result = source[0 .. $ - min(source.length, parsedSource.length + 1)];
+  source = parsedSource;
+  return result;
 }
 
-char[] ParseEscapableString(ref char[] Source, char Delimiter)
+char[] parseEscapableString(ref char[] source, char delimiter)
 {
-  enum char Escape = '\\';
+  enum char escape = '\\';
 
-  auto Target = Source;
+  auto target = source;
 
   while(true)
   {
-    Target = Target.find(Escape, Delimiter)[0];
+    target = target.find(escape, delimiter)[0];
 
-    if(Target.empty || Target.front == Delimiter) break;
+    if(target.empty || target.front == delimiter) break;
 
-    if(Target.front == Escape)
+    if(target.front == escape)
     {
-      Target.popFront();
-      assert(Target.length, Target.View(100));
+      target.popFront();
+      assert(target.length, target.view(100));
       // Skip the escaped character.
-      Target.popFront();
+      target.popFront();
     }
   }
 
-  auto Result = Source[0 .. $ - Target.length];
-  if(Target.length) Target.popFront();
-  Source = Target;
-  return Result;
+  auto result = source[0 .. $ - target.length];
+  if(target.length) target.popFront();
+  source = target;
+  return result;
 }
 
-void TryParseAttributes(ref char[] Source, ref AttributeData[] Attributes)
+void tryParseAttributes(ref char[] source, ref AttributeData[] attributes)
 {
-  if(Source.front != '[') return;
-  Source.popFront();
+  if(source.front != '[') return;
+  source.popFront();
 
-  auto AttributeSource = Source.ParseNestedString('[', ']');
-
-  typeof(return)[] Result;
+  auto attributeSource = source.parseNestedString('[', ']');
 
   while(true)
   {
-    AttributeSource.SkipWhiteSpace();
+    attributeSource.skipWhiteSpace();
 
-    if(AttributeSource.empty) break;
+    if(attributeSource.empty) break;
 
-    AttributeType NameToAttributeType(char[] Name)
+    AttributeType nameToAttributeType(char[] name)
     {
-      switch(Name)
+      switch(name)
       {
-        case "object":          return AttributeType.Object;
-        case "uuid":            return AttributeType.Uuid;
-        case "local":           return AttributeType.Local;
-        case "pointer_default": return AttributeType.PointerDefault;
-        case "in":              return AttributeType.In;
-        case "out":             return AttributeType.Out;
-        case "retval":          return AttributeType.Retval;
-        case "size_is":         return AttributeType.SizeIs;
-        case "annotation":      return AttributeType.Annotation;
-        default: assert(0, "Unknown IDL attribute: " ~ Name);
+        case "object":          return AttributeType.object;
+        case "uuid":            return AttributeType.uuid;
+        case "local":           return AttributeType.local;
+        case "pointer_default": return AttributeType.pointerDefault;
+        case "in":              return AttributeType.in_;
+        case "out":             return AttributeType.out_;
+        case "retval":          return AttributeType.retval;
+        case "size_is":         return AttributeType.sizeIs;
+        case "annotation":      return AttributeType.annotation;
+        default: assert(0, "Unknown IDL attribute: " ~ name);
       }
     }
 
-    char Delimiter;
-    auto Name = AttributeSource.FastForwardUntil!(Char => Char == ',' || Char == '(')(&Delimiter).stripRight();
+    char delimiter;
+    auto name = attributeSource.fastForwardUntil!(ch => ch == ',' || ch == '(')(&delimiter).stripRight();
 
-    AttributeData Attribute;
-    Attribute.Type = NameToAttributeType(Name);
+    AttributeData attribute;
+    attribute.type = nameToAttributeType(name);
 
-    if(Delimiter == '(')
+    if(delimiter == '(')
     {
-      Attribute.Value = AttributeSource.ParseNestedString('(', ')').strip;
-      if(Attribute.Value.front == '"')
+      attribute.value = attributeSource.parseNestedString('(', ')').strip;
+      if(attribute.value.front == '"')
       {
-        assert(Attribute.Value.back == '"');
-        Attribute.Value.popFront();
-        Attribute.Value.popBack();
+        assert(attribute.value.back == '"');
+        attribute.value.popFront();
+        attribute.value.popBack();
       }
 
-      AttributeSource.SkipWhiteSpace();
-      if(AttributeSource.length && AttributeSource.front == ',') AttributeSource.popFront();
+      attributeSource.skipWhiteSpace();
+      if(attributeSource.length && attributeSource.front == ',') attributeSource.popFront();
     }
 
-    Attributes ~= Attribute;
+    attributes ~= attribute;
   }
 }
 
-void ParseInterface(ref char[] Source, ref BlockData[] Blocks)
+void parseInterface(ref char[] source, ref BlockData[] blocks)
 {
-  Log.writeln(Log.Indentation, "=== Parsing Interface ===");
+  Log.writeln(Log.indentation, "=== Parsing Interface ===");
 
-  InterfaceData Result;
+  InterfaceData result;
 
-  TryParseAttributes(Source, Result.Attributes);
+  tryParseAttributes(source, result.attributes);
 
-  Source.SkipWhiteSpace();
+  source.skipWhiteSpace();
 
-  assert(Source.startsWith("interface"));
-  Source.FastForwardUntil!isWhite;
+  assert(source.startsWith("interface"));
+  source.fastForwardUntil!isWhite;
 
-  Source.SkipWhiteSpace();
+  source.skipWhiteSpace();
 
-  char Delimiter;
-  Result.Name = Source.FastForwardUntil!(Char => Char == ';' || Char == ':' || Char == '{')(&Delimiter).strip();
-  Log.writeln(Log.Indentation, "Name: ", Result.Name);
+  char delimiter;
+  result.name = source.fastForwardUntil!(ch => ch == ';' || ch == ':' || ch == '{')(&delimiter).strip();
+  Log.writeln(Log.indentation, "Name: ", result.name);
 
-  Source.SkipWhiteSpace();
+  source.skipWhiteSpace();
 
-  if(Delimiter == ';')
+  if(delimiter == ';')
   {
-    Log.writeln(Log.Indentation, "Ignoring forward declaration");
+    Log.writeln(Log.indentation, "Ignoring forward declaration");
     return;
   }
 
-  if(Delimiter == ':')
+  if(delimiter == ':')
   {
-    Result.ParentName = Source.FastForwardUntil!(Char => Char == '{')(&Delimiter).strip();
-    Log.writeln(Log.Indentation, "ParentName: ", Result.ParentName);
+    result.parentName = source.fastForwardUntil!(ch => ch == '{')(&delimiter).strip();
+    Log.writeln(Log.indentation, "ParentName: ", result.parentName);
   }
 
-  assert(Delimiter == '{');
+  assert(delimiter == '{');
 
-  auto Body = Source.FastForwardUntil!(Char => Char == '}');
+  auto body_ = source.fastForwardUntil!(ch => ch == '}');
 
   // d3d11.idl contains an interface without a closing ';', so we can't assert
   // for its existance. Not sure if this is the only case.
-  while(Source.front == ';') Source.popFront();
+  while(source.front == ';') source.popFront();
 
-  Log.writeln(Log.Indentation, "Body: ", Body);
+  Log.writeln(Log.indentation, "Body: ", body_);
 
-  Log.Indent();
+  Log.indent();
 
   while(true)
   {
-    Body.SkipWhiteSpace();
+    body_.skipWhiteSpace();
 
-    if(Body.empty) break;
+    if(body_.empty) break;
 
-    BlockData[] FunctionBlocks;
-    ParseFunction(Body, FunctionBlocks);
-    foreach(ref Block ; FunctionBlocks)
+    BlockData[] functionBlocks;
+    parseFunction(body_, functionBlocks);
+    foreach(ref block ; functionBlocks)
     {
-      assert(Block.Type == CodeType.Function);
-      Result.Functions ~= Block.Function;
+      assert(block.type == CodeType.function_);
+      result.functions ~= block.function_;
     }
   }
 
-  Log.Outdent();
+  Log.outdent();
 
-  Blocks ~= BlockData(CodeType.Interface);
-  Blocks[$-1].Interface = Result;
+  blocks ~= BlockData(CodeType.interface_);
+  blocks[$-1].interface_ = result;
 }
 
-void ParseFunction(ref char[] Source, ref BlockData[] Blocks)
+void parseFunction(ref char[] source, ref BlockData[] blocks)
 {
-  Log.writeln(Log.Indentation, "=== Parsing Function ===");
+  Log.writeln(Log.indentation, "=== Parsing Function ===");
 
-  FunctionData Result;
+  FunctionData result;
 
-  Result.ReturnType = Source.FastForwardUntil!isWhite;
-  Log.writeln(Log.Indentation, "Return Type: ", Result.ReturnType);
+  result.returnType = source.fastForwardUntil!isWhite;
+  Log.writeln(Log.indentation, "Return Type: ", result.returnType);
 
-  Source.SkipWhiteSpace();
+  source.skipWhiteSpace();
 
-  Result.Name = Source.FastForwardUntil!(Char => Char == '(').stripRight();
-  Log.writeln(Log.Indentation, "Name: ", Result.Name);
+  result.name = source.fastForwardUntil!(ch => ch == '(').stripRight();
+  Log.writeln(Log.indentation, "Name: ", result.name);
 
-  auto ParamSource = Source.FastForwardUntil!(Char => Char == ';');
-  Log.writeln(Log.Indentation, "Param Source: ", ParamSource);
+  auto ParamSource = source.fastForwardUntil!(ch => ch == ';');
+  Log.writeln(Log.indentation, "Param Source: ", ParamSource);
   assert(ParamSource.back == ')');
   ParamSource.popBack();
 
-  Log.Indent();
+  Log.indent();
 
   while(true)
   {
-    ParamSource.SkipWhiteSpace();
+    ParamSource.skipWhiteSpace();
 
     if(ParamSource.empty) break;
 
-    Declaration Param;
-    ParseDeclaration(ParamSource, Param, ',');
-    if(Param.Type != "void") Result.Params ~= Param;
+    Declaration param;
+    parseDeclaration(ParamSource, param, ',');
+    if(param.type != "void") result.params ~= param;
   }
 
-  Log.Outdent();
+  Log.outdent();
 
-  Blocks ~= BlockData(CodeType.Function);
-  Blocks[$-1].Function = Result;
+  blocks ~= BlockData(CodeType.function_);
+  blocks[$-1].function_ = result;
 }
 
-void ParseAlias(ref char[] Source, ref BlockData[] Blocks)
+void parseAlias(ref char[] source, ref BlockData[] blocks)
 {
-  Log.writeln(Log.Indentation, "=== Parsing Alias ===");
+  Log.writeln(Log.indentation, "=== Parsing Alias ===");
 
-  auto Result = BlockData(CodeType.Alias);
-  Result.Alias = AliasData.init;
+  auto result = BlockData(CodeType.alias_);
+  result.alias_ = AliasData.init;
 
-  auto Body = Source.FastForwardUntil!(Char => Char == ';');
+  auto body_ = source.fastForwardUntil!(ch => ch == ';');
 
-  auto TypedefToken = Body.FastForwardUntil!isWhite;
-  assert(TypedefToken == "typedef");
+  const typedefToken = fastForwardUntil!isWhite(body_);
+  assert(typedefToken == "typedef");
 
-  Result.Alias.OldName = Body.FastForwardUntil!isWhite;
-  Log.writeln(Log.Indentation, "Old name: ", Result.Alias.OldName);
+  result.alias_.oldName = body_.fastForwardUntil!isWhite;
+  Log.writeln(Log.indentation, "Old name: ", result.alias_.oldName);
 
-  Result.Alias.NewName = Body.strip; // The rest.
-  Log.writeln(Log.Indentation, "New name: ", Result.Alias.NewName);
+  result.alias_.newName = body_.strip; // The rest.
+  Log.writeln(Log.indentation, "New name: ", result.alias_.newName);
 
-  Blocks ~= Result;
+  blocks ~= result;
 }
 
-bool IsDelimiter(CharType)(CharType Char)
+bool isDelimiter(CharType)(CharType ch)
 {
-  return Char.isWhite ||
-         Char == '(' ||
-         Char == ')' ||
-         Char == '[' ||
-         Char == ']' ||
-         Char == '{' ||
-         Char == '}' ||
-         Char == '=' ||
-         Char == ',' ||
-         Char == ';';
+  return ch.isWhite ||
+         ch == '(' ||
+         ch == ')' ||
+         ch == '[' ||
+         ch == ']' ||
+         ch == '{' ||
+         ch == '}' ||
+         ch == '=' ||
+         ch == ',' ||
+         ch == ';';
 }
 
-/// Advances Source until Predicate(a) is true and returns the part of Source as a slice that has been skipped.
-/// The matching char is written to LastCharOutPtr and not included in the return value or the advanced Source.
-char[] FastForwardUntil(alias Predicate)(ref char[] Source, char* LastCharOutPtr = null)
+/// Advances source until pred(a) is true and returns the part of source as a slice that has been skipped.
+/// The matching char is written to lastCharOutPtr and not included in the return value or the advanced source.
+char[] fastForwardUntil(alias pred)(ref char[] source, char* lastCharOutPtr = null)
 {
-  auto NewSource = Source.find!Predicate();
+  auto newSource = source.find!pred();
 
-  if(NewSource.empty)
+  if(newSource.empty)
   {
-    swap(NewSource, Source);
-    return NewSource;
+    swap(newSource, source);
+    return newSource;
   }
 
-  auto Result = Source[0 .. $ - NewSource.length];
-  if(NewSource.length)
+  auto result = source[0 .. $ - newSource.length];
+  if(newSource.length)
   {
-    if(LastCharOutPtr) *LastCharOutPtr = NewSource[0];
-    NewSource.popFront();
+    if(lastCharOutPtr) *lastCharOutPtr = newSource[0];
+    newSource.popFront();
   }
 
-  Source = NewSource;
-  return Result;
+  source = newSource;
+  return result;
 }
 
 // Skips white space and comments.
-void SkipWhiteSpace(ref char[] Source)
+void skipWhiteSpace(ref char[] source)
 {
-  Source = Source.stripLeft();
+  source = source.stripLeft();
 }
 
-enum ContextCharCountThreshold = 60;
+enum contextCharCountThreshold = 60;
 
-BlockData[] Parse(ref char[] Source, int[] Stats)
+BlockData[] parse(ref char[] source, int[] stats)
 {
-  typeof(return) Result;
+  typeof(return) result;
 
   while(true)
   {
-    Source.SkipWhiteSpace();
+    source.skipWhiteSpace();
 
-    if(Source.empty) break;
+    if(source.empty) break;
 
-    Log.writefln("Looking at: %s...", Source.View(ContextCharCountThreshold));
-    Log.Indent();
+    Log.writefln("Looking at: %s...", source.view(contextCharCountThreshold));
+    Log.indent();
 
-    if(Source.startsWith("#pragma"))
+    if(source.startsWith("#pragma"))
     {
-      Source.FastForwardUntil!(Char => Char == '\n');
+      source.fastForwardUntil!(ch => ch == '\n');
     }
-    else if(Source.startsWith("import"))
+    else if(source.startsWith("import"))
     {
-      ParseImport(Source, Result);
-      Stats[CodeType.Import]++;
+      parseImport(source, result);
+      stats[CodeType.import_]++;
     }
-    else if(Source.startsWith("const") || Source.startsWith("#define"))
+    else if(source.startsWith("const") || source.startsWith("#define"))
     {
-      ParseConstant(Source, Result);
-      Stats[CodeType.Constant]++;
+      parseConstant(source, result);
+      stats[CodeType.constant]++;
     }
-    else if(Source.startsWith("cpp_quote"))
+    else if(source.startsWith("cpp_quote"))
     {
-      ParseCppQuote(Source, Result);
-      Stats[CodeType.CppQuote]++;
+      parseCppQuote(source, result);
+      stats[CodeType.cppQuote]++;
     }
-    else if(Source.startsWith("typedef"))
+    else if(source.startsWith("typedef"))
     {
-      auto SourceCopy = Source;
-      SourceCopy.FastForwardUntil!isWhite;
-      SourceCopy.SkipWhiteSpace();
+      auto sourceCopy = source;
+      sourceCopy.fastForwardUntil!isWhite;
+      sourceCopy.skipWhiteSpace();
 
-      if(SourceCopy.startsWith("enum"))
+      if(sourceCopy.startsWith("enum"))
       {
-        ParseEnum(Source, Result);
-        Stats[CodeType.Enum]++;
+        parseEnum(source, result);
+        stats[CodeType.enum_]++;
       }
-      else if(SourceCopy.startsWith("struct") || SourceCopy.startsWith("union"))
+      else if(sourceCopy.startsWith("struct") || sourceCopy.startsWith("union"))
       {
-        ParseAggregate(Source, Result);
-        Stats[CodeType.Aggregate]++;
+        parseAggregate(source, result);
+        stats[CodeType.aggregate]++;
       }
       else
       {
-        ParseAlias(Source, Result);
-        Stats[CodeType.Alias]++;
+        parseAlias(source, result);
+        stats[CodeType.alias_]++;
       }
     }
-    else if(Source.startsWith("[") || Source.startsWith("interface"))
+    else if(source.startsWith("[") || source.startsWith("interface"))
     {
-      ParseInterface(Source, Result);
-      Stats[CodeType.Interface]++;
+      parseInterface(source, result);
+      stats[CodeType.interface_]++;
     }
     else
     {
-      assert(0, "Unknown token at: " ~ Source[0 .. min(ContextCharCountThreshold, Source.length)]);
+      assert(0, "Unknown token at: " ~ source[0 .. min(contextCharCountThreshold, source.length)]);
     }
 
-    Log.Outdent();
+    Log.outdent();
     Log.writeln('-'.repeat(10));
   }
 
-  return Result;
+  return result;
 }
 
-void EmitConstant(ref ConstantData Constant, FormattedOutput Output)
+void emitConstant(ref ConstantData constant, FormattedOutput output)
 {
-  Output.writef("%senum ", Output.Indentation);
-  if(Constant.Type) Output.write(Constant.Type, " ");
-  auto Value = Constant.Value;
-  while(Value.back.toUpper == 'L') Value.popBack();
-  if(Value.back.toUpper == 'U') Value.popBack();
-  Output.writef("%s = %s;%s", Constant.Name, Value, Output.Newline);
+  output.writef("%senum ", output.indentation);
+  if(constant.type) output.write(constant.type, " ");
+  auto value = constant.value;
+  while(value.back.toUpper == 'L') value.popBack();
+  if(value.back.toUpper == 'U') value.popBack();
+  output.writef("%s = %s;%s", constant.name, value, output.newline);
 }
 
-void EmitEnum(ref EnumData Enum, FormattedOutput Output)
+void emitEnum(ref EnumData enum_, FormattedOutput output)
 {
-  const BaseTypeName = "int";
-  Output.write(Output.Indentation, "alias ", Enum.Name, " = ", BaseTypeName, ';', Output.Newline);
-  Output.write(Output.Indentation, "enum : ", Enum.Name, Output.Newline,
-               Output.Indentation, "{", Output.Newline);
+  const baseTypeName = "int";
+  output.write(output.indentation, "alias ", enum_.name, " = ", baseTypeName, ';', output.newline);
+  output.write(output.indentation, "enum : ", enum_.name, output.newline,
+               output.indentation, "{", output.newline);
 
-  Output.Indent();
+  output.indent();
 
-  auto Entries = Enum.Entries.dup;
-  auto Prefix = commonPrefix(Enum.Name, Entries[0].Key);
+  auto entries = enum_.entries.dup;
 
-  size_t MaxLen;
-  foreach(ref Entry; Entries)
+  size_t maxLen;
+  foreach(ref entry; entries)
   {
-    MaxLen = max(MaxLen, Entry.Key.length);
+    maxLen = max(maxLen, entry.key.length);
   }
 
-  foreach(ref Entry; Entries)
+  foreach(ref entry; entries)
   {
-    Output.write(Output.Indentation, Entry.Key);
-    if(Entry.Value.length)
+    output.write(output.indentation, entry.key);
+    if(entry.value.length)
     {
-      Output.writef("%s = %s", ' '.repeat(MaxLen - Entry.Key.length), Entry.Value);
+      output.writef("%s = %s", ' '.repeat(maxLen - entry.key.length), entry.value);
     }
-    Output.write(",", Output.Newline);
+    output.write(",", output.newline);
   }
-  Output.Outdent();
-  Output.write(Output.Indentation, "}", Output.Newline);
+  output.outdent();
+  output.write(output.indentation, "}", output.newline);
 }
 
-void EmitDeclaration(ref Declaration Decl, FormattedOutput Output, Flag!"IsFunctionParam" IsFunctionParam)
+void emitDeclaration(ref Declaration decl, FormattedOutput output, Flag!"IsFunctionParam" isFunctionParam)
 {
   // Add an extra newline here in attempt to make the interface look nicer for
   // inner aggregate types.
-  if(Decl.Body) Output.write(Output.Newline);
+  if(decl.body_) output.write(output.newline);
 
-  if(Decl.Attributes)
+  if(decl.attributes)
   {
-    Output.writef("%s// %([%s]%)]%s", Output.Indentation, Decl.Attributes, Output.Newline);
+    output.writef("%s// %([%s]%)]%s", output.indentation, decl.attributes, output.newline);
   }
 
-  if(Decl.Body)
+  if(decl.body_)
   {
-    assert(!IsFunctionParam, "Function parameters in D can't be inline aggregate type declarations (probably).");
-    assert(Decl.Type == "struct" || Decl.Type == "union", Decl.Type);
+    assert(!isFunctionParam, "Function parameters in D can't be inline aggregate type declarations (probably).");
+    assert(decl.type == "struct" || decl.type == "union", decl.type);
 
-    Output.write(Output.Indentation);
+    output.write(output.indentation);
 
     // Inner structs should be static.
-    if(Decl.Type == "struct") Output.write("static ");
+    if(decl.type == "struct") output.write("static ");
 
-    Output.write(Decl.Type, " ", Decl.Name, Output.Newline,
-                 Output.Indentation, '{', Output.Newline);
+    output.write(decl.type, " ", decl.name, output.newline,
+                 output.indentation, '{', output.newline);
 
-    Output.Indent();
+    output.indent();
 
-    foreach(ref Member; Decl.Body)
+    foreach(ref member; decl.body_)
     {
-      EmitDeclaration(Member, Output, No.IsFunctionParam);
+      emitDeclaration(member, output, No.IsFunctionParam);
     }
 
-    Output.Outdent();
+    output.outdent();
 
-    Output.write(Output.Indentation, '}');
+    output.write(output.indentation, '}');
   }
   else
   {
-    auto Type = Decl.Type;
-    const IsInterfaceType = Type.front == 'I' && Type.canFind!(Char => Char.isLower());
-    const NumPointers = Type.count('*');
-    const IsConst = Type.canFind(" const", "const ");
+    auto type = decl.type;
+    const isInterfaceType = type.front == 'I' && type.canFind!(ch => ch.isLower());
+    const numPointers = type.count('*');
+    const isConst = type.canFind(" const", "const ");
 
-    char[] TypeBaseName;
+    char[] typeBaseName;
     do
     {
-      TypeBaseName = Type.FastForwardUntil!(Char => Char.isWhite || Char == '*');
-      Type.SkipWhiteSpace();
-    } while(TypeBaseName == "const");
+      typeBaseName = type.fastForwardUntil!(ch => ch.isWhite || ch == '*');
+      type.skipWhiteSpace();
+    } while(typeBaseName == "const");
 
-    if(IsInterfaceType) assert(NumPointers > 0);
+    if(isInterfaceType) assert(numPointers > 0);
 
-    Output.write(Output.Indentation);
+    output.write(output.indentation);
 
-    if(IsConst) Output.write(IsFunctionParam ? "in " : "const ");
+    if(isConst) output.write(isFunctionParam ? "in " : "const ");
 
-    auto Pointers = '*'.repeat(IsInterfaceType ? NumPointers - 1 : NumPointers);
-    Output.write(TypeBaseName, Pointers);
+    auto pointers = '*'.repeat(isInterfaceType ? numPointers - 1 : numPointers);
+    output.write(typeBaseName, pointers);
 
-    foreach(Count; Decl.ArrayCounts)
+    foreach(Count; decl.arrayCounts)
     {
-      Output.writef("[%s]", Count);
+      output.writef("[%s]", Count);
     }
 
-    Output.write(" ", Decl.Name, IsFunctionParam ? ',' : ';');
+    output.write(" ", decl.name, isFunctionParam ? ',' : ';');
   }
 
-  Output.write(Output.Newline);
+  output.write(output.newline);
 }
 
-void EmitAggregate(ref AggregateData Aggregate, FormattedOutput Output)
+void emitAggregate(ref AggregateData aggregate, FormattedOutput output)
 {
-  Log.writeln(Log.Indentation, "Emitting aggregate: ", Aggregate);
+  Log.writeln(Log.indentation, "Emitting aggregate: ", aggregate);
 
-  Output.write(Output.Indentation);
+  output.write(output.indentation);
 
-  final switch(Aggregate.AggregateType)
+  final switch(aggregate.aggregateType)
   {
-    case AggregateData.Type.Struct: Output.write("struct "); break;
-    case AggregateData.Type.Union:  Output.write("union ");  break;
+    case AggregateData.Type.struct_: output.write("struct "); break;
+    case AggregateData.Type.union_:  output.write("union ");  break;
   }
 
-  Output.write(Aggregate.Name, Output.Newline,
-               Output.Indentation, "{", Output.Newline);
+  output.write(aggregate.name, output.newline,
+               output.indentation, "{", output.newline);
 
-  Output.Indent();
+  output.indent();
 
-  foreach(ref Member; Aggregate.Members[])
+  foreach(ref member; aggregate.members[])
   {
-    EmitDeclaration(Member, Output, No.IsFunctionParam);
+    emitDeclaration(member, output, No.IsFunctionParam);
   }
 
-  Output.Outdent();
+  output.outdent();
 
-  Output.write(Output.Indentation, "}", Output.Newline);
+  output.write(output.indentation, "}", output.newline);
 }
 
-void EmitInterface(ref InterfaceData Interface, FormattedOutput Output)
+void emitInterface(ref InterfaceData interface_, FormattedOutput output)
 {
-  char[] Uuid = Interface.Attributes.find!(Attr => Attr.Type == AttributeType.Uuid).front.Value;
-  Output.write(Output.Indentation, "mixin DEFINE_GUID!(", Interface.Name, `, "`, Uuid, `");`, Output.Newline);
+  char[] uuid = interface_.attributes.find!(attr => attr.type == AttributeType.uuid).front.value;
+  output.write(output.indentation, "mixin DEFINE_GUID!(", interface_.name, `, "`, uuid, `");`, output.newline);
 
-  if(Interface.Attributes)
+  if(interface_.attributes)
   {
-    Output.writef("%s// %([%s]%)]%s", Output.Indentation, Interface.Attributes, Output.Newline);
+    output.writef("%s// %([%s]%)]%s", output.indentation, interface_.attributes, output.newline);
   }
 
-  if(Interface.ParentName)
+  if(interface_.parentName)
   {
-    Output.write(Output.Indentation, "interface ", Interface.Name, " : ", Interface.ParentName, Output.Newline);
+    output.write(output.indentation, "interface ", interface_.name, " : ", interface_.parentName, output.newline);
   }
   else
   {
-    Output.write(Output.Indentation, "interface ", Interface.Name, Output.Newline);
+    output.write(output.indentation, "interface ", interface_.name, output.newline);
   }
 
-  Output.write(Output.Indentation, "{", Output.Newline,
-               Output.Indentation, "extern(Windows):", Output.Newline,
-               Output.Newline);
+  output.write(output.indentation, "{", output.newline,
+               output.indentation, "extern(Windows):", output.newline,
+               output.newline);
 
-  Output.Indent();
+  output.indent();
 
-  foreach(ref Function; Interface.Functions)
+  foreach(ref function_; interface_.functions)
   {
-    EmitFunction(Function, Output, No.AddExternWindows);
-    Output.write(Output.Newline);
+    emitFunction(function_, output, No.AddExternWindows);
+    output.write(output.newline);
   }
 
-  Output.Outdent();
+  output.outdent();
 
-  Output.write(Output.Indentation, "}", Output.Newline);
+  output.write(output.indentation, "}", output.newline);
 }
 
-void EmitFunction(ref FunctionData Function, FormattedOutput Output, Flag!"AddExternWindows" AddExternWindows = Yes.AddExternWindows)
+void emitFunction(ref FunctionData function_, FormattedOutput output,
+  Flag!"AddExternWindows" addExternWindows = Yes.AddExternWindows)
 {
-  scope(failure) Log.writeln("Failure emitting function: ", Function);
+  scope(failure) Log.writeln("Failure emitting function: ", function_);
 
-  Output.write(Output.Indentation);
-  if(AddExternWindows) Output.write("extern(Windows) ");
-  Output.write(Function.ReturnType, " ", Function.Name, "(");
+  output.write(output.indentation);
+  if(addExternWindows) output.write("extern(Windows) ");
+  output.write(function_.returnType, " ", function_.name, "(");
 
-  if(Function.Params)
+  if(function_.params)
   {
-    Output.write(Output.Newline);
+    output.write(output.newline);
 
-    Output.Indent();
+    output.indent();
 
-    foreach(ref Param; Function.Params)
+    foreach(ref param; function_.params)
     {
-      EmitDeclaration(Param, Output, Yes.IsFunctionParam);
+      emitDeclaration(param, output, Yes.IsFunctionParam);
     }
 
-    Output.Outdent();
-    Output.write(Output.Indentation);
+    output.outdent();
+    output.write(output.indentation);
   }
 
-  Output.write(");", Output.Newline);
+  output.write(");", output.newline);
 }
 
-void EmitAlias(ref AliasData Alias, FormattedOutput Output)
+void emitAlias(ref AliasData alias_, FormattedOutput output)
 {
-  Output.write(Output.Indentation);
-  Output.writef("alias %s = %s;%s", Alias.NewName, Alias.OldName, Output.Newline);
+  output.write(output.indentation);
+  output.writef("alias %s = %s;%s", alias_.newName, alias_.oldName, output.newline);
 }
 
-void EmitImport(ref ImportData Import, FormattedOutput Output)
+void emitImport(ref ImportData import_, FormattedOutput output)
 {
-  Output.write(Output.Indentation, "import ", Import.Filename.stripExtension, ';', Output.Newline);
+  output.write(output.indentation, "import ", import_.filename.stripExtension, ';', output.newline);
 }
 
-void EmitCppQuote(ref CppQuoteData CppQuote, FormattedOutput Output)
+void emitCppQuote(ref CppQuoteData cppQuote, FormattedOutput output)
 {
-  Output.write(Output.Indentation, CppQuote.Content, Output.Newline);
+  output.write(output.indentation, cppQuote.content, output.newline);
 }
 
-void EmitD3DCOLORVALUE(ref AliasData Alias, FormattedOutput Output)
+void emitD3DCOLORVALUE(ref AliasData alias_, FormattedOutput output)
 {
-  assert(Alias.OldName == "D3DCOLORVALUE");
-  Output.write(Output.Indentation, "struct ", Alias.NewName, Output.Newline,
-               Output.Indentation, "{", Output.Newline);
+  assert(alias_.oldName == "D3DCOLORVALUE");
+  output.write(output.indentation, "struct ", alias_.newName, output.newline,
+               output.indentation, "{", output.newline);
 
-  Output.Indent();
+  output.indent();
 
-  Output.write(Output.Indentation, "float r;", Output.Newline,
-               Output.Indentation, "float g;", Output.Newline,
-               Output.Indentation, "float b;", Output.Newline,
-               Output.Indentation, "float a;", Output.Newline);
+  output.write(output.indentation, "float r;", output.newline,
+               output.indentation, "float g;", output.newline,
+               output.indentation, "float b;", output.newline,
+               output.indentation, "float a;", output.newline);
 
-  Output.Outdent();
+  output.outdent();
 
-  Output.write(Output.Indentation, "}", Output.Newline);
+  output.write(output.indentation, "}", output.newline);
 }
 
-void EmitBlocks(BlockData[] Blocks, FormattedOutput Output, int CppQuoteBatchId = 0)
+void emitBlocks(BlockData[] blocks, FormattedOutput output, int cppQuoteBatchId = 0)
 {
-  while(Blocks.length)
+  while(blocks.length)
   {
-    auto Block = &Blocks.front;
-    Blocks.popFront();
+    auto block = &blocks.front;
+    blocks.popFront();
 
-    Output.write(Output.Newline);
+    output.write(output.newline);
 
-    final switch(Block.Type)
+    final switch(block.type)
     {
-      case CodeType.Import:
+      case CodeType.import_:
       {
-        EmitImport(Block.Import, Output);
+        emitImport(block.import_, output);
         break;
       }
-      case CodeType.Constant:
+      case CodeType.constant:
       {
-        EmitConstant(Block.Constant, Output);
+        emitConstant(block.constant, output);
         break;
       }
-      case CodeType.Enum:
+      case CodeType.enum_:
       {
-        EmitEnum(Block.Enum, Output);
+        emitEnum(block.enum_, output);
         break;
       }
-      case CodeType.Aggregate:
+      case CodeType.aggregate:
       {
-        EmitAggregate(Block.Aggregate, Output);
+        emitAggregate(block.aggregate, output);
         break;
       }
-      case CodeType.Interface:
+      case CodeType.interface_:
       {
-        EmitInterface(Block.Interface, Output);
+        emitInterface(block.interface_, output);
         break;
       }
-      case CodeType.Function:
+      case CodeType.function_:
       {
-        EmitFunction(Block.Function, Output);
+        emitFunction(block.function_, output);
         break;
       }
-      case CodeType.Alias:
+      case CodeType.alias_:
       {
-        if(Block.Alias.OldName == "D3DCOLORVALUE")
+        if(block.alias_.oldName == "D3DCOLORVALUE")
         {
-          EmitD3DCOLORVALUE(Block.Alias, Output);
+          emitD3DCOLORVALUE(block.alias_, output);
         }
         else
         {
-          EmitAlias(Block.Alias, Output);
+          emitAlias(block.alias_, output);
         }
 
         break;
       }
-      case CodeType.CppQuote:
+      case CodeType.cppQuote:
       {
         // cpp_quotes are emitted in batches.
-        const NumConsecutiveCppQuotes = Blocks.countUntil!(Block => Block.Type != CodeType.CppQuote);
-        scope(exit) CppQuoteBatchId += NumConsecutiveCppQuotes;
+        const numConsecutiveCppQuotes = blocks.countUntil!(block => block.type != CodeType.cppQuote);
+        scope(exit) cppQuoteBatchId += numConsecutiveCppQuotes;
 
-        Output.write(Output.Indentation, "// Begin cpp_quote #", CppQuoteBatchId);
-        if(NumConsecutiveCppQuotes > 1) Output.write("-", CppQuoteBatchId + NumConsecutiveCppQuotes - 1);
-        Output.write(Output.Newline);
+        output.write(output.indentation, "// Begin cpp_quote #", cppQuoteBatchId);
+        if(numConsecutiveCppQuotes > 1) output.write("-", cppQuoteBatchId + numConsecutiveCppQuotes - 1);
+        output.write(output.newline);
 
         while(true)
         {
-          EmitCppQuote(Block.CppQuote, Output);
-          if(Blocks.empty) break;
-          Block = &Blocks.front;
-          if(Block.Type != CodeType.CppQuote) break;
-          Blocks.popFront();
+          emitCppQuote(block.cppQuote, output);
+          if(blocks.empty) break;
+          block = &blocks.front;
+          if(block.type != CodeType.cppQuote) break;
+          blocks.popFront();
         }
 
-        Output.write(Output.Indentation, "// End cpp_quote #", CppQuoteBatchId);
-        if(NumConsecutiveCppQuotes > 1) Output.write("-", CppQuoteBatchId + NumConsecutiveCppQuotes - 1);
-        Output.write(Output.Newline);
+        output.write(output.indentation, "// End cpp_quote #", cppQuoteBatchId);
+        if(numConsecutiveCppQuotes > 1) output.write("-", cppQuoteBatchId + numConsecutiveCppQuotes - 1);
+        output.write(output.newline);
 
         break;
       }
-      case CodeType.INVALID: assert(0, Block.Type.to!string);
+      case CodeType.invalid: assert(0, block.type.to!string);
     }
   }
 }
 
-char[] ReadTextAsUTF8(in string Filename)
+char[] readTextAsUTF8(in string filename)
 {
-  return Filename.read().to!(char[]);
+  return filename.read().to!(char[]);
 }
 
 // Replaces all comments with spaces.
-char[] Preprocess(char[] Source)
+char[] preprocess(char[] source)
 {
-  auto Search = Source;
-  while(Search.length)
+  auto search = source;
+  while(search.length)
   {
-    Search = Search.find("//", "/*", "cpp_quote")[0];
+    search = search.find("//", "/*", "cpp_quote")[0];
 
-    if(Search.startsWith("//"))
+    if(search.startsWith("//"))
     {
-      auto Garbage = Search.FastForwardUntil!(Char => Char == '\n');
-      Garbage[] = ' ';
+      auto garbage = search.fastForwardUntil!(ch => ch == '\n');
+      garbage[] = ' ';
     }
-    else if(Search.startsWith("/*"))
+    else if(search.startsWith("/*"))
     {
-      auto ContinueHere = Search.find("*/");
-      if(ContinueHere.length) ContinueHere.popFrontN(2);
-      auto Garbage = Search[0 .. $ - ContinueHere.length];
-      Search = ContinueHere;
-      Garbage[] = ' ';
+      auto continueHere = search.find("*/");
+      if(continueHere.length) continueHere.popFrontN(2);
+      auto garbage = search[0 .. $ - continueHere.length];
+      search = continueHere;
+      garbage[] = ' ';
     }
-    else if(Search.startsWith("cpp_quote"))
+    else if(search.startsWith("cpp_quote"))
     {
-      Search.popFrontN("cpp_quote".length);
-      Search.SkipWhiteSpace();
-      assert(Search.front == '(');
-      Search.popFront();
-      Search.SkipWhiteSpace();
-      assert(Search.front == '"');
-      Search.popFront();
-      Search.ParseEscapableString('"');
+      search.popFrontN("cpp_quote".length);
+      search.skipWhiteSpace();
+      assert(search.front == '(');
+      search.popFront();
+      search.skipWhiteSpace();
+      assert(search.front == '"');
+      search.popFront();
+      search.parseEscapableString('"');
     }
   }
 
-  return Source;
+  return source;
 }
 
-enum OutContentHeader = q{
+enum outContentHeader = q{
 version(Windows):
 
 import core.sys.windows.windows;
